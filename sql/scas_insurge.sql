@@ -24,16 +24,20 @@ USE scas;
 
 CREATE TABLE IF NOT EXISTS `insurge_history` (
   `hist_id` int(12) NOT NULL,
-  `repos_id` char(24) NOT NULL,
-  `group_id` char(12) NOT NULL,
-  `uid` int(10) NOT NULL,
-  `bnum` int(13) NOT NULL,
+  `repos_id` char(24) DEFAULT NULL,
+  `group_id` char(12) DEFAULT NULL,
+  `uid` varchar(12) DEFAULT NULL,
+  `bnum` int(12) NOT NULL,
   `codate` datetime NOT NULL,
-  `title` text,
-  `author` text,
-  `added` datetime NOT NULL
-  PRIMARY KEY  (`hist_id`),
-  KEY `repos_id` (`repos_id`,`group_id`,`uid`,`bnum`,`codate`)
+  `title` text CHARACTER SET utf8,
+  `author` text CHARACTER SET utf8,
+  `added` datetime NOT NULL,
+  PRIMARY KEY (`hist_id`),
+  KEY `repos_id` (`repos_id`),
+  KEY `group_id` (`group_id`),
+  KEY `uid` (`uid`),
+  KEY `bnum` (`bnum`),
+  KEY `codate` (`codate`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Tracks patron check-out history';
 
 -- --------------------------------------------------------

@@ -332,17 +332,16 @@ class insurge_client extends insurge {
     return $dbq->fetchOne();
   }
   
-  function add_checkout_history($uid, $bnum, $co_date, $title, $author) {
+  function add_checkout_history($hist_id, $uid, $bnum, $co_date, $title, $author) {
     $group_id = $this->insurge_config['repository_info']['group_id'];
     if ($uid && $bnum && $co_date) {
       $db =& MDB2::connect($this->dsn);
-      $next_hist_id = $db->nextID('insurge_reviews');
       if ($group_id) {
-        $repos_id = $group_id . '-' . $next_hist_id;
+        $repos_id = $group_id . '-' . $hist_id;
       }
-      $title_txt = $db->quote($rev_body, 'text');
-      $author_txt = $db->quote($rev_body, 'text');
-      $sql = "INSERT INTO insurge_history VALUES ($next_hist_id, '$repos_id', '$group_id', $uid, $bnum, '$co_date', $title_txt, $author_txt)";
+      $title_txt = $db->quote($title, 'text');
+      $author_txt = $db->quote($author, 'text');
+      $sql = "INSERT INTO insurge_history VALUES ($hist_id, '$repos_id', '$group_id', $uid, $bnum, '$co_date', $title_txt, $author_txt, NOW())";
       $db->exec($sql);
     }
   }
@@ -350,7 +349,7 @@ class insurge_client extends insurge {
   function get_checkout_history($uid = NULL, $limit = NULL, $offset = NULL) {
     $group_id = $this->insurge_config['repository_info']['group_id'];
     if ($uid) { $where_str .= ' ' . $where_prefix . ' uid = ' . $uid . ' '; $where_prefix = 'AND'; }
-    if ($group_id) { $where_str .= ' ' . $where_prefix . ' group_id = "' . $group_id . '" '; $where_prefix = 'AND'; }
+    if ($group_id) { $where_str .= ' ' . $where_prefix . ' group_id = "' . $group_id . '" '; $where_prefix = ''; }
     $db =& MDB2::connect($this->dsn);
 
     $sql = "SELECT * FROM insurge_history WHERE " . $where_str . $where_prefix . " ORDER BY codate DESC, hist_id DESC";

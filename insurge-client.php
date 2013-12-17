@@ -346,13 +346,51 @@ class insurge_client extends insurge {
     }
   }
   
-  function get_checkout_history($uid = NULL, $limit = NULL, $offset = NULL) {
+  // TODO: Sort, search by title/author
+  function get_checkout_history($uid = NULL, $search_str = NULL, $sort = NULL, $limit = NULL, $offset = NULL) {
+    
     $group_id = $this->insurge_config['repository_info']['group_id'];
-    if ($uid) { $where_str .= ' ' . $where_prefix . ' uid = ' . $uid . ' '; $where_prefix = 'AND'; }
-    if ($group_id) { $where_str .= ' ' . $where_prefix . ' group_id = "' . $group_id . '" '; $where_prefix = ''; }
     $db =& MDB2::connect($this->dsn);
 
-    $sql = "SELECT * FROM insurge_history WHERE " . $where_str . $where_prefix . " ORDER BY codate DESC, hist_id DESC";
+    // Construct search query
+    $where_str = NULL;
+
+    if ($group_id) {
+      $where_str .= ' ' . $where_prefix . ' group_id = "' . $group_id . '" ';
+      $where_prefix = 'AND';
+    }
+
+    if ($uid) {
+      $where_str .= ' ' . $where_prefix . ' uid = ' . $uid . ' ';
+      $where_prefix = 'AND';
+    }
+
+    if ($search_str) { 
+      $search_txt = $db->quote($search_str, 'text');
+      $where_str .= ' ' . $where_prefix . ' MATCH (title, author) AGAINST (' . $search_txt . ' IN BOOLEAN MODE) ';
+    }
+
+    // Construct sort string
+    if ($sort == 'title_up') {
+      $sort_txt = ' ORDER BY title ASC ';
+    } else if ($sort == 'title_down') {
+      $sort_txt = ' ORDER BY title DESC ';
+    } else if ($sort == 'author_up') {
+      $sort_txt = ' ORDER BY author ASC ';
+    } else if ($sort == 'author_down') {
+      $sort_txt = ' ORDER BY author DESC ';
+    } else {
+      $sort_txt = ' ORDER BY codate DESC, hist_id DESC ';
+    }
+
+    // Construct pagination
+    if (!$limit) { $limit = 25; }   // Default pagination
+    if (!$offset) { $offset = 0; }  // Default pagination
+    $page_txt = ' LIMIT ' . $offset . ', ' . $limit;
+
+    // Pull it all together
+    $where = ($where_str) ? ' WHERE ' : NULL;
+    $sql = "SELECT * FROM insurge_history " . $where . $where_str . $sort_txt . $page_txt;
     $dbq = $db->query($sql);
     $result = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
     return $result;

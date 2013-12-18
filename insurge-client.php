@@ -347,7 +347,7 @@ class insurge_client extends insurge {
   }
   
   // TODO: Sort, search by title/author
-  function get_checkout_history($uid = NULL, $search_str = NULL, $sort = NULL, $limit = NULL, $offset = NULL) {
+  function get_checkout_history($uid = NULL, $search_str = NULL, $sort = NULL, $limit = 25, $offset = 0) {
     
     $group_id = $this->insurge_config['repository_info']['group_id'];
     $db =& MDB2::connect($this->dsn);
@@ -384,9 +384,9 @@ class insurge_client extends insurge {
     }
 
     // Construct pagination
-    if (!$limit) { $limit = 25; }   // Default pagination
-    if (!$offset) { $offset = 0; }  // Default pagination
-    $page_txt = ' LIMIT ' . $offset . ', ' . $limit;
+    if ($limit) {
+      $page_txt = ' LIMIT ' . $offset . ', ' . $limit;
+    }
 
     // Pull it all together
     $where = ($where_str) ? ' WHERE ' : NULL;

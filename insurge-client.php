@@ -396,12 +396,12 @@ class insurge_client extends insurge {
     return $result;
   }
 
-  function delete_checkout_history($uid, $hist_id, $all_hist = NULL) {
+  function delete_checkout_history($uid, $hist_id = NULL, $all_hist = NULL) {
     $db =& MDB2::connect($this->dsn);
     if ($all_hist) {
       $sql = "DELETE FROM insurge_history WHERE uid = " . $uid;
     } else {
-      $sql = "DELETE FROM insurge_history WHERE hist_id = " . $hist_id;
+      $sql = "DELETE FROM insurge_history WHERE uid = " . $uid . " AND hist_id = " . $hist_id;
     }
     $dbq = $db->query($sql);
     $result = $dbq->fetchAll(MDB2_FETCHMODE_ASSOC);
